@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMSBot - Login</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--bg-color);
+        }
+        .auth-container {
+            background-color: var(--chat-bg);
+            padding: 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        .auth-container h1 {
+            color: var(--text-color);
+            margin-bottom: 0.5rem;
+        }
+        .auth-container p {
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .auth-btn:hover {
+            background-color: var(--primary-hover);
+        }
+        .toggle-auth {
+            margin-top: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+        .toggle-auth a {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .error-message {
+            color: #ff4444;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+    </style>
+</head>
+<body class="light-mode">
+    <div class="auth-container">
+        <h1 id="auth-title">Welcome Back</h1>
+        <p id="auth-subtitle">Sign in to continue to LMSBot</p>
+        
+        <div id="error-msg" class="error-message"></div>
+
+        <form id="auth-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="auth-btn" id="submit-btn">Sign In</button>
+        </form>
+
+        <div class="toggle-auth">
+            <span id="toggle-text">Don't have an account? </span>
+            <a id="toggle-link">Sign Up</a>
+        </div>
+    </div>
+    
+    <script src="auth.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+Flask
+google-generativeai
+python-dotenv 
+requests
+numpy
+chromadb
+flask-cors
+pypdf
+pandas
+openpyxl
+beautifulsoup4
+pydantic-settings
+sentence-transformers
+duckduckgo-search
+pyjwt

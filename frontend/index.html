@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LMSBot</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <script>
+        if (!localStorage.getItem('lms_token')) {
+            window.location.href = 'login.html';
+        }
+    </script>
+</head>
+<body>
+    <header class="main-header">
+        <h1>LMSBot</h1>
+    </header>
+    <div class="container">
+        <aside class="sidebar">
+            <div class="sidebar-content">
+                <div class="sidebar-top">
+                    <!-- ... (matches existing content) ... -->
+                    <div class="sidebar-controls">
+                        <button class="icon-button" id="toggle-sidebar">
+                            <span class="iconify" data-icon="ph:sidebar-simple"></span>
+                        </button>
+                    </div>
+                    <nav class="sidebar-nav">
+                        <a href="#" class="nav-item" id="new-chat-btn">
+                            <span class="iconify" data-icon="fluent:chat-24-regular"></span>
+                            <span>New Chat</span>
+                        </a>
+
+                    </nav>
+                    <div class="chats-section">
+                        <div class="chats-header">
+                            <h2>Chats</h2>
+                            <button class="icon-button" id="search-chat-btn">
+                                <span class="iconify" data-icon="ph:magnifying-glass"></span>
+                            </button>
+                        </div>
+                        <input type="text" id="chat-search-input" class="chat-search-input" placeholder="Search chats...">
+                        <div class="chats-list-container">
+                            <ul class="chats-list" id="chats-list">
+                                <!-- Chats will be populated dynamically -->
+                            </ul>
+                             <div class="no-chats" id="no-chats" style="display: none;">
+                                <p>No Chats</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <footer class="sidebar-footer">
+                    <div class="user-profile" id="user-profile-btn">
+                        <span class="iconify user-avatar" data-icon="ph:user-circle-fill"></span>
+                        <div class="user-info">
+                            <span class="user-name" id="display-username">User</span>
+                            <span class="user-email" id="display-email">user@example.com</span>
+                        </div>
+                        <button class="icon-button">
+                            <span class="iconify" data-icon="ph:caret-up-down"></span>
+                        </button>
+                    </div>
+                    <!-- User Dropdown -->
+                    <div class="user-dropdown" id="user-dropdown">
+                        <div class="dropdown-item" id="logout-option">
+                            <span class="iconify" data-icon="ph:sign-out"></span>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                </footer>
+            </div>
+        </aside>
+        <main class="main-content">
+            <div class="chat-area" id="chat-area">
+                <div class="welcome-message" id="welcome-message">
+                    <h1>Hi, how can I assist you today?</h1>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <div id="file-previews" class="file-previews"></div>
+                <div class="chat-input-wrapper">
+                    <div class="input-icons">
+                       <button class="icon-button" id="role-select-btn"><span class="iconify" data-icon="ph:user"></span></button>
+                       <button class="icon-button" id="attach-file-btn"><span class="iconify" data-icon="ph:paperclip"></span></button>
+                       <input type="file" id="file-input" hidden multiple/>
+                       <button class="icon-button" id="voice-record-btn"><span class="iconify" data-icon="ph:microphone"></span></button>
+                    </div>
+                    <input type="text" id="chat-input" placeholder="Type something...">
+                    <button class="icon-button send-button" id="send-button">
+                        <span class="iconify" data-icon="ph:paper-plane-tilt-fill"></span>
+                    </button>
+                </div>
+                <!-- Role Selection Dialog -->
+                <div class="role-dialog" id="role-dialog">
+                    <div>
+                        <input type="radio" id="student" name="role" value="student">
+                        <label for="student">Student</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="faculty" name="role" value="faculty">
+                        <label for="faculty">Faculty</label>
+                    </div>
+                    <button id="select-role-confirm">Select Role</button>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <!-- Context Menu -->
+    <div id="context-menu" class="context-menu">
+        <div class="context-menu-item" id="rename-chat">
+            <span class="iconify" data-icon="ph:pencil-line"></span>
+            <span>Rename</span>
+        </div>
+        <div class="context-menu-item delete" id="delete-chat">
+            <span class="iconify" data-icon="ph:trash"></span>
+            <span>Delete</span>
+        </div>
+    </div>
+
+    <script src="https://code.iconify.design/3/3.1.1/iconify.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
