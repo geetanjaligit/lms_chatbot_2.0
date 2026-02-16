@@ -96,30 +96,30 @@ def main():
                 print(f"   ✅ Loaded {len(d)} rows from {f}")
     
     # 3. Process Web Crawler (Using your web_crawler.py)
-    # print("\n🕷️  Running Web Crawler (Lite Mode)...")
-    # try:
-    #     # Crawling fewer pages (15) to keep it fast for testing
-    #     web_pages = crawl_sharda_website(max_pages=111)
-    #     for i, (url, content) in enumerate(web_pages):
-    #         all_docs.append(f"Source: {url}\nContent: {content[:4000]}") # Limit text length
-    #         all_metas.append({"source": url, "type": "web_page"})
-    #         all_ids.append(f"web_{i}")
-    #     print(f"   ✅ Crawled {len(web_pages)} pages")
-    # except Exception as e:
-    #     print(f"   ⚠️ Crawler failed: {e}")
+    print("\n🕷️  Running Dynamic Web Crawler...")
+    try:
+        # Increased to 150 pages as requested for better depth
+        web_pages = crawl_sharda_website(max_pages=150)
+        for i, (url, content) in enumerate(web_pages):
+            all_docs.append(f"Source: {url}\nContent: {content[:4000]}") # Limit text length
+            all_metas.append({"source": url, "type": "web_page"})
+            all_ids.append(f"web_{i}")
+        print(f"   ✅ Crawled {len(web_pages)} pages")
+    except Exception as e:
+        print(f"   ⚠️ Crawler failed: {e}")
 
     # 4. Process Fees (Using your fee_scraper.py)
-    # print("\n💰 Running Fee Scraper...")
-    # try:
-    #     fee_docs, fee_metas = scrape_course_fees()
-    #     # Parse fee scraper output to match our lists
-    #     for i, doc in enumerate(fee_docs):
-    #         all_docs.append(doc)
-    #         all_metas.append(fee_metas[i])
-    #         all_ids.append(f"fee_{i}")
-    #     print(f"   ✅ Scraped {len(fee_docs)} fee records")
-    # except Exception as e:
-    #     print(f"   ⚠️ Fee Scraper failed: {e}")
+    print("\n💰 Running Fee Scraper...")
+    try:
+        fee_docs, fee_metas = scrape_course_fees()
+        # Parse fee scraper output to match our lists
+        for i, doc in enumerate(fee_docs):
+            all_docs.append(doc)
+            all_metas.append(fee_metas[i])
+            all_ids.append(f"fee_{i}")
+        print(f"   ✅ Scraped {len(fee_docs)} fee records")
+    except Exception as e:
+        print(f"   ⚠️ Fee Scraper failed: {e}")
 
     # 5. Embed and Store
     print(f"\n💾 Saving {len(all_docs)} total chunks to database...")

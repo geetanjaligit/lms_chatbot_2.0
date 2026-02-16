@@ -1,173 +1,97 @@
 """
 Course Fee Scraper for Sharda University
-Fetches course fee information from https://www.sharda.ac.in/course-fee
-Uses Selenium to handle JavaScript-rendered content better than BeautifulSoup alone
+Uses crawl4ai to handle dynamic content and JS-rendered tabs (Semester/Yearly fees)
 """
 
-import requests
-from bs4 import BeautifulSoup
+import asyncio
 import re
-import time
 from typing import List, Dict, Tuple
+from crawl4ai import AsyncWebCrawler, BrowserConfig, CrawlerRunConfig, CacheMode
 
 class CourseFeeScraper:
     def __init__(self):
         self.base_url = "https://www.sharda.ac.in/course-fee"
-        self.headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        }
-    
-    def fetch_fee_page(self) -> str:
+
+    async def scrape_async(self) -> Tuple[List[str], List[Dict]]:
         """
-        Fetch the course fee page
-        Returns the HTML content
+        Scrape course fee page using crawl4ai with JS execution to handle tabs
         """
-        try:
-            print(f"Fetching course fee page: {self.base_url}")
-            response = requests.get(
-                self.base_url,
-                headers=self.headers,
-                timeout=15
-            )
-            response.raise_for_status()
-            print(f"  OK Page fetched successfully")
-            return response.text
-        except requests.RequestException as e:
-            print(f"  FAIL Error fetching fee page: {e}")
-            return ""
-    
-    def extract_course_fees(self, html: str) -> List[Dict[str, str]]:
-        """
-        Extract course and fee information from HTML
-        Returns list of dictionaries with course info
-        """
-        if not html:
-            return []
+        print(f"Starting dynamic scrape of: {self.base_url}")
         
-        try:
-            soup = BeautifulSoup(html, 'html.parser')
-            courses = []
-            
-            # Remove script and style elements
-            for script in soup(["script", "style", "nav", "footer"]):
-                script.decompose()
-            
-            # Extract tables if they exist
-            tables = soup.find_all('table')
-            if tables:
-                print(f"  Found {len(tables)} table(s)")
-                for table in tables:
-                    rows = table.find_all('tr')
-                    for row in rows:
-                        cells = row.find_all(['td', 'th'])
-                        if cells and len(cells) >= 2:
-                            row_data = {}
-                            for idx, cell in enumerate(cells):
-                                text = cell.get_text(strip=True)
-                                if text:
-                                    row_data[f"column_{idx}"] = text
-                            if row_data:
-                                courses.append(row_data)
-            
-            # Extract structured divs/sections with fee info
-            fee_sections = soup.find_all(['div', 'section'], class_=re.compile('fee|course|price|cost', re.I))
-            for section in fee_sections:
-                text = section.get_text(strip=True)
-                if text and len(text) > 20:
-                    courses.append({
-                        "content": text,
-                        "type": "section"
-                    })
-            
-            # Extract all text with course-related keywords
-            full_text = soup.get_text()
-            # Clean up text
-            lines = (line.strip() for line in full_text.splitlines())
-            chunks = (phrase.strip() for line in lines for phrase in line.split("  "))
-            cleaned_text = '\n'.join(chunk for chunk in chunks if chunk)
-            
-            if cleaned_text and not courses:
-                # If no structured data found, return cleaned text
-                return [{
-                    "content": cleaned_text,
-                    "type": "raw_text",
-                    "note": "Unstructured content"
-                }]
-            
-            return courses
+        browser_config = BrowserConfig(headless=True)
         
-        except Exception as e:
-            print(f"  FAIL Error extracting fees: {e}")
-            return []
-    
-    def parse_course_data(self, extracted_data: List[Dict]) -> Tuple[List[str], List[Dict]]:
+        # JS to click tabs and extract content for each
+        # We'll extract the main content and any specific fee tables
+        js_code = """
+        (async () => {
+            const results = {};
+            const tabs = Array.from(document.querySelectorAll('.nav-tabs a, [data-toggle="tab"]'));
+            
+            // Initial state (usually Yearly Fee)
+            results['Default'] = document.body.innerText;
+            
+            for (const tab of tabs) {
+                const tabText = tab.innerText.trim();
+                if (tabText.toLowerCase().includes('fee')) {
+                    tab.click();
+                    await new Promise(r => setTimeout(r, 800)); // Wait for transition
+                    results[tabText] = document.body.innerText;
+                }
+            }
+            return results;
+        })();
         """
-        Convert extracted course data to document chunks and metadata
-        Returns (documents, metadatas) suitable for ChromaDB ingestion
-        """
+
+        run_config = CrawlerRunConfig(
+            cache_mode=CacheMode.BYPASS,
+            js_code=js_code
+        )
+
         documents = []
         metadatas = []
-        
-        for idx, data in enumerate(extracted_data):
-            if "content" in data:
-                doc_text = data["content"]
-            else:
-                doc_text = " | ".join(f"{k}: {v}" for k, v in data.items() if k.startswith('column'))
-            
-            if doc_text and len(doc_text) > 10:
-                documents.append(doc_text)
-                metadatas.append({
-                    "source": "course_fee_page",
-                    "url": self.base_url,
-                    "type": data.get("type", "structured"),
-                    "index": idx
-                })
-        
-        return documents, metadatas
-    
-    def scrape_course_fees(self) -> Tuple[List[str], List[Dict]]:
-        """
-        Main method to scrape course fees and return formatted data
-        Returns (documents, metadatas)
-        """
-        print("\n=== COURSE FEE SCRAPER ===")
-        print(f"Target URL: {self.base_url}\n")
-        
-        # Fetch the page
-        html = self.fetch_fee_page()
-        if not html:
-            print("  ERROR: Failed to fetch the fee page")
-            return [], []
-        
-        # Extract course data
-        extracted_data = self.extract_course_fees(html)
-        print(f"  Extracted {len(extracted_data)} course records")
-        
-        if not extracted_data:
-            print("  WARNING: No course data extracted")
-            return [], []
-        
-        # Parse into document format
-        documents, metadatas = self.parse_course_data(extracted_data)
-        print(f"  Formatted into {len(documents)} documents for ChromaDB")
-        
-        return documents, metadatas
 
+        try:
+            async with AsyncWebCrawler(config=browser_config) as crawler:
+                result = await crawler.arun(url=self.base_url, config=run_config)
+                
+                if result.success and result.js_execution_result:
+                    tab_contents = result.js_execution_result
+                    for tab_name, content in tab_contents.items():
+                        # Clean up content using simple regex or split
+                        # Focus on lines containing 'Fee', 'Course', or numbers
+                        relevant_lines = [
+                            line.strip() for line in content.split('\n') 
+                            if any(k in line.lower() for k in ['fee', 'course', 'rs.', 'total', 'semester', 'yearly'])
+                            and len(line.strip()) > 5
+                        ]
+                        
+                        cleaned_content = "\n".join(relevant_lines)
+                        if len(cleaned_content) > 100:
+                            # Split into chunks of ~2000 chars if too large
+                            chunk_size = 2000
+                            for i in range(0, len(cleaned_content), chunk_size):
+                                chunk = cleaned_content[i:i+chunk_size]
+                                documents.append(f"Source: {self.base_url} (Tab: {tab_name})\n{chunk}")
+                                metadatas.append({
+                                    "source": self.base_url,
+                                    "type": "fee_data",
+                                    "tab": tab_name
+                                })
+                    print(f"  OK Extracted {len(documents)} documents from fee tabs")
+                else:
+                    print(f"  FAIL: JS execution failed or no results. Error: {result.error_message}")
+        except Exception as e:
+            print(f"  FAIL: Unexpected error during fee scraping: {e}")
+
+        return documents, metadatas
 
 def scrape_course_fees() -> Tuple[List[str], List[Dict]]:
-    """
-    Convenience function to scrape course fees
-    Returns (documents, metadatas)
-    """
+    """Synchronous wrapper for async scraper"""
     scraper = CourseFeeScraper()
-    return scraper.scrape_course_fees()
-
+    return asyncio.run(scraper.scrape_async())
 
 if __name__ == "__main__":
-    # Test the scraper
     docs, metas = scrape_course_fees()
-    print(f"\nTotal documents: {len(docs)}")
-    print(f"Total metadatas: {len(metas)}")
+    print(f"Total documents: {len(docs)}")
     if docs:
-        print(f"\nFirst document (first 300 chars):\n{docs[0][:300]}")
-        print(f"\nFirst metadata:\n{metas[0]}")
+        print(f"Example doc: {docs[0][:500]}")
