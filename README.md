@@ -1,4 +1,4 @@
-# LMS Chatbot (RAG System)
+# LMS Chatbot (RAG-System)
 
 This project is a **Retrieval-Augmented Generation (RAG) based LMS chatbot** built with Python. Follow the steps below carefully to set up and run the system locally.
 
@@ -109,3 +109,4 @@ python app_rag.py
 * Keep your `.env` file private and **never commit it to GitHub**
 
 ---
+
