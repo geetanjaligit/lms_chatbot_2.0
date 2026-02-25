@@ -102,10 +102,23 @@ python app_rag.py
 
 ---
 
-## Notes
+---
 
-* Always activate the virtual environment before running the project
-* Re-run `ingest_data.py` whenever your data source changes
-* Keep your `.env` file private and **never commit it to GitHub**
+## Deployment (Render)
+
+To deploy this project to Render:
+
+1. **Connect your GitHub repository** to a new Render Web Service.
+2. **Environment Variables**: Add `GEMINI_API_KEY` and `JINA_API_KEY` in the Render dashboard.
+3. **Build Command**: 
+   ```bash
+   pip install -r requirements.txt && python ingest_data.py
+   ```
+4. **Start Command**:
+   ```bash
+   python app_rag.py
+   ```
+
 
 ---
+
