@@ -5,7 +5,7 @@ import sqlite3
 import jwt
 import datetime
 import functools
-from flask import Flask, request, jsonify, make_response
+from flask import Flask, request, jsonify, make_response, send_from_directory
 from flask_cors import CORS
 from dotenv import load_dotenv
 from google.genai import Client
@@ -13,7 +13,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 load_dotenv()
 
-app = Flask(__name__)
+# Set static folder to 'frontend'
+app = Flask(__name__, static_folder='frontend', static_url_path='')
 CORS(app)
 
 # Configuration
@@ -39,6 +40,20 @@ def init_user_db():
 
 init_user_db()
 
+# --- Static File Serving ---
+@app.route('/')
+def index():
+    return send_from_directory(app.static_folder, 'login.html')
+
+@app.route('/chat_page')
+def chat_page():
+    return send_from_directory(app.static_folder, 'index.html')
+
+@app.route('/<path:path>')
+def send_static(path):
+    return send_from_directory(app.static_folder, path)
+
+# --- Authentication Logic ---
 def token_required(f):
     @functools.wraps(f)
     def decorated(*args, **kwargs):
@@ -171,4 +186,5 @@ def chat():
     })
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)

@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const endpoint = isLogin ? '/login' : '/register';
-        const url = `http://localhost:5000${endpoint}`;
+        const url = endpoint; // Use relative path
 
         try {
             submitBtn.disabled = true;
