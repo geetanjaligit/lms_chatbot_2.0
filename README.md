@@ -109,7 +109,10 @@ python app_rag.py
 To deploy this project to Render:
 
 1. **Connect your GitHub repository** to a new Render Web Service.
-2. **Environment Variables**: Add `GEMINI_API_KEY` and `JINA_API_KEY` in the Render dashboard.
+2. **Environment Variables**: Add these three in the Render dashboard:
+   - `GEMINI_API_KEY`
+   - `JINA_API_KEY`
+   - `PYTHON_VERSION` = `3.11.9` (This is **CRITICAL** to prevent version conflicts)
 3. **Build Command**: 
    ```bash
    pip install -r requirements.txt && python ingest_data.py
